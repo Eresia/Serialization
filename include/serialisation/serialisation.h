@@ -4,13 +4,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
+#include <unistd.h>
+#include <sys/time.h>
+#include <string.h>
 
 #include "useful/bool.h"
+
+typedef enum State State;
+enum State{STATE_WAIT, STATE_IN_PROGRESS, STATE_ENDED, STATE_OUT_DEADLINE};
 
 typedef struct Crit Crit;
 struct Crit{
 	pthread_mutex_t mutex;
-	bool canContinue;
+	State state;
 };
 
 typedef struct Task Task;
@@ -20,20 +26,41 @@ struct Task{
 	char* name;
 };
 
+typedef struct Log Log;
+struct Log{
+	FILE* file;
+	pthread_mutex_t mutex;
+};
+
 typedef struct Branch Branch;
 struct Branch{
-	int time;
+	int maxTime;
 	int nbTasks;
 	Task** tasks;
 	char* name;
+
+	Log* log;
 };
 
-Task* createTask(void* function, char* name);
+typedef struct LogMessage LogMessage;
+struct LogMessage{
+	Log* log;
+	char** message;
+	pthread_mutex_t messageMutex;
+};
 
-Branch* createBranch(Task** tasks, int nbTasks, int time, char* name);
-
-pthread_t* serialize(Branch** branchs, int nbBranch);
-
+/*======Private======*/
 void* launchBranch(void* b);
+bool outDeadline(struct timeval beginTime, struct timeval nowTime, int maxTime);
+void* logGestion(void* logMessage_void);
+char* createLogMessage(char* branchName, Task** tasks, int lastTask, bool aborted, int time);
+void sendToLog(LogMessage log, char* message);
+
+/*======Public======*/
+Task* createTask(void* function, char* name);
+Log* createLogInfo(FILE* file);
+Branch* createBranch(Task** tasks, int nbTasks, int maxTime, char* name, Log* log);
+pthread_t* serialize(Branch** branchs, int nbBranch);
+void waitMutex(Crit* crit);
 
 #endif
