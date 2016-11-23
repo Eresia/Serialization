@@ -4,11 +4,11 @@
 #include <fcntl.h>
 #include "serialization/serialization.h"
 
-void* T1(void* mutex);
-void* T2(void* mutex);
-void* T3(void* mutex);
-void* T4(void* mutex);
-void* T5(void* mutex);
+void T1();
+void T2();
+void T3();
+void T4();
+void T5();
 
 int main(int argc, char** argv){
 
@@ -47,11 +47,11 @@ int main(int argc, char** argv){
 		printf("Initialize Tasks and Branchs\n");
 	#endif
 
-	tasks1[0] = createTask(T1, "T1");
-	tasks2[0] = createTask(T2, "T2");
-	tasks2[1] = createTask(T3, "T3");
-	tasks2[2] = createTask(T4, "T4");
-	tasks3[0] = createTask(T5, "T5");
+	tasks1[0] = createTask(&T1, "T1");
+	tasks2[0] = createTask(&T2, "T2");
+	tasks2[1] = createTask(&T3, "T3");
+	tasks2[2] = createTask(&T4, "T4");
+	tasks3[0] = createTask(&T5, "T5");
 
 	log = createLogInfo(logFile);
 
@@ -72,59 +72,22 @@ int main(int argc, char** argv){
 	return 0;
 }
 
-void* T1(void* crit_void){
-	Crit* crit = (Crit*) crit_void;
+void T1(){
 
-	while(true){
-		waitMutex(crit);
-	}
-
-	pthread_exit(NULL);
 }
 
-void* T2(void* crit_void){
+void T2(){
 
-	Crit* crit = (Crit*) crit_void;
-
-	while(true){
-		waitMutex(crit);
-
-
-
-	}
-
-	pthread_exit(NULL);
 }
 
-void* T3(void* crit_void){
+void T3(){
 
-	Crit* crit = (Crit*) crit_void;
-
-	while(true){
-		waitMutex(crit);
-	}
-
-	pthread_exit(NULL);
 }
 
-void* T4(void* crit_void){
+void T4(){
 
-	Crit* crit = (Crit*) crit_void;
-
-	while(true){
-		waitMutex(crit);
-	}
-
-	pthread_exit(NULL);
 }
 
-void* T5(void* crit_void){
+void T5(){
 
-	Crit* crit = (Crit*) crit_void;
-
-	while(true){
-		waitMutex(crit);
-	}
-
-	pthread_exit(NULL);
 }

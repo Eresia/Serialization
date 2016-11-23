@@ -14,7 +14,7 @@ void* launchBranch(void* branch_void){
 
 	for(int i = 0; i < (*branch)->nbTasks; i++){
 		Task* task = (*branch)->tasks[i];
-		pthread_mutex_lock(&task->crit.mutex);
+		pthread_mutex_lock(&task->taskInfo.mutex);
 	}
 
 	log.log = (*branch)->log;
@@ -30,7 +30,7 @@ void* launchBranch(void* branch_void){
 	while(true){
 		struct timeval beginTime, endTime;
 		int completeTime;
-		State taskState;
+		State taskInfo;
 		int lastTask;
 		char* message;
 
@@ -51,28 +51,28 @@ void* launchBranch(void* branch_void){
 				printf("Branch \"%s\" : Begin Task \"%s\"\n", (*branch)->name, task->name);
 			#endif
 
-			task->crit.state = STATE_IN_PROGRESS;
-			pthread_mutex_unlock(&task->crit.mutex);
+			task->taskInfo.state = STATE_IN_PROGRESS;
+			pthread_mutex_unlock(&task->taskInfo.mutex);
 
 			do{
-				pthread_mutex_lock(&task->crit.mutex);
-				taskState = task->crit.state;
-				pthread_mutex_unlock(&task->crit.mutex);
+				pthread_mutex_lock(&task->taskInfo.mutex);
+				taskInfo = task->taskInfo.state;
+				pthread_mutex_unlock(&task->taskInfo.mutex);
 
 				gettimeofday(&endTime, NULL);
 				if(outDeadline(beginTime, endTime, (*branch)->maxTime)){
-					taskState = STATE_OUT_DEADLINE;
+					taskInfo = STATE_OUT_DEADLINE;
 				}
 
 				usleep(20000);
-			}while((taskState != STATE_ENDED) && (taskState != STATE_OUT_DEADLINE));
+			}while((taskInfo != STATE_ENDED) && (taskInfo != STATE_OUT_DEADLINE));
 
-			pthread_mutex_lock(&task->crit.mutex);
-			task->crit.state = STATE_WAIT;
+			pthread_mutex_lock(&task->taskInfo.mutex);
+			task->taskInfo.state = STATE_WAIT;
 
 			lastTask = i;
 
-			if(taskState == STATE_OUT_DEADLINE){
+			if(taskInfo == STATE_OUT_DEADLINE){
 				#ifdef DEBUG
 					printf("Branch \"%s\" : DeadLine out at task \"%s\"\n", (*branch)->name, (*branch)->tasks[lastTask]->name);
 				#endif
@@ -86,8 +86,20 @@ void* launchBranch(void* branch_void){
 		#endif
 
 		completeTime = ((endTime.tv_sec * 1000000) + (endTime.tv_usec)) - ((beginTime.tv_sec * 1000000) + (beginTime.tv_usec));
-		message = createLogMessage((*branch)->name, (*branch)->tasks, lastTask, (taskState == STATE_OUT_DEADLINE), completeTime);
+		message = createLogMessage((*branch)->name, (*branch)->tasks, lastTask, (taskInfo == STATE_OUT_DEADLINE), completeTime);
 		sendToLog(log, message);
+	}
+
+	pthread_exit(NULL);
+}
+
+void* launchTask(void* taskInfo_void){
+
+	TaskInfo* taskInfo = (TaskInfo*) taskInfo_void;
+
+	while(true){
+		waitMutex(taskInfo);
+		taskInfo->function();
 	}
 
 	pthread_exit(NULL);
@@ -192,16 +204,17 @@ void sendToLog(LogMessage log, char* message){
 }
 
 /*======Public======*/
-Task* createTask(void* function, char* name){
+Task* createTask(void (*function)(void), char* name){
 
 	Task* newTask = (Task*) malloc(sizeof(Task));
 
 	pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
-	newTask->crit.mutex = mutex;
-	newTask->crit.state = STATE_WAIT;
+	newTask->taskInfo.mutex = mutex;
+	newTask->taskInfo.state = STATE_WAIT;
+	newTask->taskInfo.function = function;
 
-	pthread_create(&newTask->thread, NULL, function, &newTask->crit);
+	pthread_create(&newTask->thread, NULL, launchTask, &newTask->taskInfo);
 
 	newTask->name = name;
 	return newTask;
@@ -247,19 +260,19 @@ pthread_t* serialize(Branch** branchs, int nbBranch){
 	return threads;
 }
 
-void waitMutex(Crit* crit){
+void waitMutex(TaskInfo* taskInfo){
 
 	State needWait;
 
-	pthread_mutex_lock(&crit->mutex);
-	if(crit->state == STATE_IN_PROGRESS){
-		crit->state = STATE_ENDED;
+	pthread_mutex_lock(&taskInfo->mutex);
+	if(taskInfo->state == STATE_IN_PROGRESS){
+		taskInfo->state = STATE_ENDED;
 	}
-	pthread_mutex_unlock(&crit->mutex);
+	pthread_mutex_unlock(&taskInfo->mutex);
 
 	do{
-		pthread_mutex_lock(&crit->mutex);
-		needWait = crit->state;
-		pthread_mutex_unlock(&crit->mutex);
+		pthread_mutex_lock(&taskInfo->mutex);
+		needWait = taskInfo->state;
+		pthread_mutex_unlock(&taskInfo->mutex);
 	}while(needWait != STATE_IN_PROGRESS);
 }

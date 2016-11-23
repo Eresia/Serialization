@@ -13,16 +13,17 @@
 typedef enum State State;
 enum State{STATE_WAIT, STATE_IN_PROGRESS, STATE_ENDED, STATE_OUT_DEADLINE};
 
-typedef struct Crit Crit;
-struct Crit{
+typedef struct TaskInfo TaskInfo;
+struct TaskInfo{
 	pthread_mutex_t mutex;
 	State state;
+	void (*function)(void);
 };
 
 typedef struct Task Task;
 struct Task{
 	pthread_t thread;
-	Crit crit;
+	TaskInfo taskInfo;
 	char* name;
 };
 
@@ -50,17 +51,18 @@ struct LogMessage{
 };
 
 /*======Private======*/
-void* launchBranch(void* b);
+void* launchBranch(void* branch_void);
+void* launchTask(void* crit_void);
+void waitMutex(TaskInfo* taskInfo);
 bool outDeadline(struct timeval beginTime, struct timeval nowTime, int maxTime);
 void* logGestion(void* logMessage_void);
 char* createLogMessage(char* branchName, Task** tasks, int lastTask, bool aborted, int time);
 void sendToLog(LogMessage log, char* message);
 
 /*======Public======*/
-Task* createTask(void* function, char* name);
+Task* createTask(void (*function)(void), char* name);
 Log* createLogInfo(int file);
 Branch* createBranch(Task** tasks, int nbTasks, int maxTime, char* name, Log* log);
 pthread_t* serialize(Branch** branchs, int nbBranch);
-void waitMutex(Crit* crit);
 
 #endif
