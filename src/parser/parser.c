@@ -49,14 +49,16 @@ ParsedData* parseTreeXML(xmlDocPtr doc){
 			Task** tasks = (Task**) malloc(nbTasks * sizeof(Task*));
 			j = 0;
 			for(xmlNode* actTask = getNodeChildren(actBranch); actTask != NULL; actTask = actTask->next){
-				char* taskName = (char*) xmlGetProp(actTask, (xmlChar*) "name");
-				char* taskFunctionFile = (char*) xmlGetProp(getNodeChildren(actTask), (xmlChar*) "file");
-				char* taskFunctionName = (char*) xmlGetProp(getNodeChildren(actTask), (xmlChar*) "name");
-				tasks[j] = createTask(taskName, taskFunctionFile, taskFunctionName);
-				if(tasks[j] == NULL){
-					return NULL;
+				if(actTask->type == XML_ELEMENT_NODE){
+					char* taskName = (char*) xmlGetProp(actTask, (xmlChar*) "name");
+					char* taskFunctionFile = (char*) xmlGetProp(getNodeChildren(actTask), (xmlChar*) "file");
+					char* taskFunctionName = (char*) xmlGetProp(getNodeChildren(actTask), (xmlChar*) "name");
+					tasks[j] = createTask(taskName, taskFunctionFile, taskFunctionName);
+					if(tasks[j] == NULL){
+						return NULL;
+					}
+					j++;
 				}
-				j++;
 			}
 			branchs[i] = createBranch(tasks, nbTasks, branchTime, branchName, log);
 			i++;
