@@ -30,6 +30,9 @@ all: $(launcher)
 $(launcher): compilation
 	$(CC) -o $(launcher) $(objects) $(EFLAGS)
 
+plug:
+	make -C plugins
+
 compilation:
 	@mkdir $(objectDir) -p
 	@for dir in $(directories); do \
