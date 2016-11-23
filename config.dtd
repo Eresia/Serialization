@@ -1,0 +1,13 @@
+<!ELEMENT config (info,builder)>
+<!ELEMENT info (logFile)>
+<!ELEMENT logFile EMPTY>
+<!ATTLIST logFile name CDATA #REQUIRED>
+<!ELEMENT builder (branch+)>
+<!ELEMENT branch (task+)>
+<!ATTLIST branch name CDATA #REQUIRED>
+<!ATTLIST branch time CDATA #REQUIRED>
+<!ELEMENT task (function)>
+<!ATTLIST task name CDATA #REQUIRED>
+<!ELEMENT function EMPTY>
+<!ATTLIST function file CDATA #REQUIRED>
+<!ATTLIST function name CDATA #REQUIRED>

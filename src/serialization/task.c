@@ -1,6 +1,30 @@
 #include "serialization/task.h"
 
 /*======Private======*/
+void* loadFunction(char* functionFile, char* functionName){
+	void (*func)();
+
+	// Opening library
+	void *hndl = dlopen(functionFile, RTLD_LAZY);
+	if(hndl == NULL)
+	{
+		printf("Error with dlopen : %s\n", dlerror());
+		return NULL;
+	}
+
+	// Load function
+	func = dlsym(hndl, functionName);
+	if (func == NULL)
+	{
+		printf("Error with dlsym : %s\n", dlerror());
+		dlclose(hndl);
+		return NULL;
+	}
+
+	// Exécution de la fonction "func"
+	return func;
+}
+
 void* launchTask(void* taskInfo_void){
 
 	TaskInfo* taskInfo = (TaskInfo*) taskInfo_void;
@@ -31,7 +55,7 @@ void waitMutex(TaskInfo* taskInfo){
 }
 
 /*======Public======*/
-Task* createTask(void (*function)(void), char* name){
+Task* createTask(char* name, char* functionFile, char* functionName){
 
 	Task* newTask = (Task*) malloc(sizeof(Task));
 
@@ -39,10 +63,17 @@ Task* createTask(void (*function)(void), char* name){
 
 	newTask->taskInfo.mutex = mutex;
 	newTask->taskInfo.state = STATE_WAIT;
-	newTask->taskInfo.function = function;
 
-	pthread_create(&newTask->thread, NULL, launchTask, &newTask->taskInfo);
+	newTask->taskInfo.function = loadFunction(functionFile, functionName);
 
-	newTask->name = name;
+	if(newTask->taskInfo.function == NULL){
+		free(newTask);
+		newTask = NULL;
+	}
+	else{
+		pthread_create(&newTask->thread, NULL, launchTask, &newTask->taskInfo);
+		newTask->name = name;
+	}
+
 	return newTask;
 }

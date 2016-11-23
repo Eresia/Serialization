@@ -6,7 +6,7 @@ srcDir=src
 headDir=include
 
 CFLAGS=-Wall -g -DDEBUG -I$(scriptDir)/$(headDir) `xml2-config --cflags`
-EFLAGS=-lpthread
+EFLAGS=-lpthread `xml2-config --libs` -ldl
 
 srcExt=.c
 headerExt=.h

@@ -25,6 +25,6 @@ bool outDeadline(struct timeval beginTime, struct timeval nowTime, int maxTime);
 
 /*======Public======*/
 Branch* createBranch(Task** tasks, int nbTasks, int maxTime, char* name, Log* log);
-pthread_t* serialize(Branch** branchs, int nbBranch);
+int serialize(Branch** branchs, int nbBranch);
 
 #endif

@@ -116,7 +116,7 @@ Branch* createBranch(Task** tasks, int nbTasks, int maxTime, char* name, Log* lo
 	return newBranch;
 }
 
-pthread_t* serialize(Branch** branchs, int nbBranch){
+int serialize(Branch** branchs, int nbBranch){
 
 	pthread_t* threads = (pthread_t*) malloc(nbBranch*sizeof(pthread_t));
 
@@ -128,5 +128,9 @@ pthread_t* serialize(Branch** branchs, int nbBranch){
 		pthread_create(&threads[i], NULL, launchBranch, &branchs[i]);
 	}
 
-	return threads;
+	for(int i = 0; i < nbBranch; i++){
+		pthread_join(threads[i] , NULL);
+	}
+
+	return 0;
 }

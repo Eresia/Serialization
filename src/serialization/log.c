@@ -91,7 +91,12 @@ void sendToLog(LogMessage log, char* message){
 }
 
 /*======Public======*/
-Log* createLogInfo(int file){
+Log* createLog(char* fileName, char* firstLine){
+
+	int file = open(fileName, O_WRONLY | O_TRUNC);
+	if(firstLine != NULL){
+		write(file, firstLine, strlen(firstLine));
+	}
 
 	Log* fileInfo = (Log*) malloc(sizeof(Log));
 	pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;

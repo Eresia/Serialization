@@ -1,7 +1,9 @@
 #ifndef TASK_H
 #define TASK_H
 
+#include <stdio.h>
 #include <stdlib.h>
+#include <dlfcn.h>
 #include <pthread.h>
 
 #include "useful/bool.h"
@@ -24,10 +26,11 @@ struct Task{
 };
 
 /*======Private======*/
+void* loadFunction(char* functionFile, char* functionName);
 void* launchTask(void* crit_void);
 void waitMutex(TaskInfo* taskInfo);
 
 /*======Public======*/
-Task* createTask(void (*function)(void), char* name);
+Task* createTask(char* name, char* functionFile, char* functionName);
 
 #endif

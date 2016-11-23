@@ -2,11 +2,10 @@
 #include <pthread.h>
 #include <string.h>
 #include <fcntl.h>
-#include <libxml/parser.h>
 
 #include "serialization/branch.h"
-#include "serialization/task.h"
-#include "serialization/log.h"
+
+#include "parser/parser.h"
 
 void T1();
 void T2();
@@ -16,7 +15,23 @@ void T5();
 
 int main(int argc, char** argv){
 
-	int nbBranch = 3;
+	ParsedData* parsed;
+
+	if(argc < 2){
+		printf("Need the config file name in argument");
+		return -1;
+	}
+
+	parsed = parseXML(argv[1]);
+
+	if(parsed == NULL){
+		printf("Bad config file\n");
+		return -2;
+	}
+
+	return serialize(parsed->branchs, parsed->nbBranch);
+
+	/*int nbBranch = 3;
 
 	Task** tasks1 = (Task**) malloc(sizeof(Task*));
 	Task** tasks2 = (Task**) malloc(3*sizeof(Task*));
@@ -73,7 +88,7 @@ int main(int argc, char** argv){
 		pthread_join(threads[i] , NULL);
 	}
 
-	return 0;
+	return 0;*/
 }
 
 void T1(){

@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <fcntl.h>
 #include <unistd.h>
 #include <string.h>
 #include <pthread.h>
@@ -30,6 +31,6 @@ char* createLogMessage(char* branchName, Task** tasks, int lastTask, bool aborte
 void sendToLog(LogMessage log, char* message);
 
 /*======Public======*/
-Log* createLogInfo(int file);
+Log* createLog(char* fileName, char* firstLine);
 
 #endif
