@@ -11,7 +11,7 @@ EFLAGS=-lpthread
 srcExt=.c
 headerExt=.h
 
-launcher=serialisation.out
+launcher=serialization.out
 
 directories=$(shell find $(srcDir) -type d | sed '1d')
 headDirectories=$(shell find $(headDir) -type d | sed '1d')
@@ -42,10 +42,10 @@ compilation:
 	done
 
 clean_all: clean
-	rm $(launcher)
+	rm -f $(launcher)
 
 clean:
-	rm -R $(objectDir)
+	rm -Rf $(objectDir)
 
 clean_error:
 	@for dir in $(directories); do \

@@ -1,5 +1,5 @@
-#ifndef SERIALISATION_H
-#define SERIALISATION_H
+#ifndef SERIALIZATION_H
+#define SERIALIZATION_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -28,8 +28,8 @@ struct Task{
 
 typedef struct Log Log;
 struct Log{
-	FILE* file;
-	pthread_mutex_t mutex;
+	int file;
+	pthread_mutex_t fileMutex;
 };
 
 typedef struct Branch Branch;
@@ -58,7 +58,7 @@ void sendToLog(LogMessage log, char* message);
 
 /*======Public======*/
 Task* createTask(void* function, char* name);
-Log* createLogInfo(FILE* file);
+Log* createLogInfo(int file);
 Branch* createBranch(Task** tasks, int nbTasks, int maxTime, char* name, Log* log);
 pthread_t* serialize(Branch** branchs, int nbBranch);
 void waitMutex(Crit* crit);

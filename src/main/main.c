@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <pthread.h>
 #include <string.h>
-#include "serialisation/serialisation.h"
+#include <fcntl.h>
+#include "serialization/serialization.h"
 
 void* T1(void* mutex);
 void* T2(void* mutex);
@@ -21,7 +22,7 @@ int main(int argc, char** argv){
 
 	pthread_t* threads;
 
-	FILE* logFile;
+	int logFile;
 	Log* log;
 	char* nbLineString = malloc((strlen("NB_LINES = ")+(nbBranch%10)+3) * sizeof(char));
 
@@ -30,10 +31,21 @@ int main(int argc, char** argv){
 		return 1;
 	}
 
-	logFile = fopen(argv[1], "w+");
+	#ifdef DEBUG
+		printf("Opening file %s\n", argv[1]);
+	#endif
+
+	logFile = open(argv[1], O_WRONLY | O_TRUNC);
 	if(sprintf(nbLineString, "NB_LINES = %d\n", nbBranch) > 0){
-		fputs(nbLineString, logFile);
+		#ifdef DEBUG
+			printf("Writing on file : \"%s\"\n", nbLineString);
+		#endif
+		write(logFile, nbLineString, strlen(nbLineString));
 	}
+
+	#ifdef DEBUG
+		printf("Initialize Tasks and Branchs\n");
+	#endif
 
 	tasks1[0] = createTask(T1, "T1");
 	tasks2[0] = createTask(T2, "T2");
@@ -46,6 +58,10 @@ int main(int argc, char** argv){
 	branchs[0] = createBranch(tasks1, 1, 300, "Line 1", log);
 	branchs[1] = createBranch(tasks2, 3, 300, "Line 2", log);
 	branchs[2] = createBranch(tasks3, 1, 300, "Line 3", log);
+
+	#ifdef DEBUG
+		printf("Begin Serialize\n");
+	#endif
 
 	threads = serialize(branchs, nbBranch);
 
@@ -72,6 +88,9 @@ void* T2(void* crit_void){
 
 	while(true){
 		waitMutex(crit);
+
+
+
 	}
 
 	pthread_exit(NULL);
