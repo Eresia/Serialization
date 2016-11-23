@@ -1,4 +1,4 @@
-#include "serialization/serialization.h"
+#include "serialization/branch.h"
 
 /*======Private======*/
 void* launchBranch(void* branch_void){
@@ -93,18 +93,6 @@ void* launchBranch(void* branch_void){
 	pthread_exit(NULL);
 }
 
-void* launchTask(void* taskInfo_void){
-
-	TaskInfo* taskInfo = (TaskInfo*) taskInfo_void;
-
-	while(true){
-		waitMutex(taskInfo);
-		taskInfo->function();
-	}
-
-	pthread_exit(NULL);
-}
-
 bool outDeadline(struct timeval beginTime, struct timeval nowTime, int maxTime){
 	gettimeofday(&nowTime, NULL);
 
@@ -114,124 +102,7 @@ bool outDeadline(struct timeval beginTime, struct timeval nowTime, int maxTime){
 	return ((completeNowTime - completeBeginTime) > maxTime * 1000);
 }
 
-void* logGestion(void* logMessage_void){
-	LogMessage* logMessage = (LogMessage*) logMessage_void;
-	char* message = NULL;
-
-	while(true){
-		pthread_mutex_lock(&logMessage->messageMutex);
-		if(*logMessage->message != NULL){
-			message = *logMessage->message;
-			*logMessage->message = NULL;
-		}
-		pthread_mutex_unlock(&logMessage->messageMutex);
-
-		if(message != NULL){
-			pthread_mutex_lock(&logMessage->log->fileMutex);
-			#ifdef DEBUG
-				printf("Test Writing on file : \"%s\"\n", message);
-			#endif
-			write(logMessage->log->file, message, strlen(message));
-			//fputs(message, logMessage->log->file);
-			pthread_mutex_unlock(&logMessage->log->fileMutex);
-
-			if(message != NULL){
-				free(message);
-				message = NULL;
-			}
-
-		}
-
-		usleep(20000);
-	}
-
-	pthread_exit(NULL);
-}
-
-char* createLogMessage(char* branchName, Task** tasks, int lastTask, bool aborted, int time){
-
-	char* result;
-	int completeSize = strlen(branchName);
-	completeSize += strlen(" : ");
-	for(int i = 0; i <= lastTask; i++){
-		completeSize += strlen(tasks[i]->name) + strlen(" -> ");
-	}
-
-	if(aborted){
-		completeSize += strlen("ABORTED ");
-	}
-	else{
-		completeSize += strlen("END ");
-	}
-
-	completeSize += (time % 10) + 1;
-
-	completeSize += 2;
-
-	result = malloc(completeSize * sizeof(char));
-
-	sprintf(result, "%s : ", branchName);
-
-	for(int i = 0; i <= lastTask; i++){
-		sprintf(result, "%s%s -> ", result, tasks[i]->name);
-	}
-
-	if(aborted){
-		sprintf(result, "%sAborted ", result);
-	}
-	else{
-		sprintf(result, "%sEnd ", result);
-	}
-
-	sprintf(result, "%s%d\n", result, time/1000);
-
-	return result;
-}
-
-void sendToLog(LogMessage log, char* message){
-	pthread_mutex_lock(&log.messageMutex);
-	if(*log.message == NULL){
-		*log.message = malloc((strlen(message)+1)*sizeof(char));
-		strcpy(*log.message, message);
-	}
-	else{
-		*log.message = realloc(*log.message, (strlen(*log.message)+strlen(message)+1)*sizeof(char));
-		if(*log.message != NULL){
-			strcat(*log.message, message);
-		}
-	}
-	pthread_mutex_unlock(&log.messageMutex);
-}
-
 /*======Public======*/
-Task* createTask(void (*function)(void), char* name){
-
-	Task* newTask = (Task*) malloc(sizeof(Task));
-
-	pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-
-	newTask->taskInfo.mutex = mutex;
-	newTask->taskInfo.state = STATE_WAIT;
-	newTask->taskInfo.function = function;
-
-	pthread_create(&newTask->thread, NULL, launchTask, &newTask->taskInfo);
-
-	newTask->name = name;
-	return newTask;
-}
-
-Log* createLogInfo(int file){
-
-	Log* fileInfo = (Log*) malloc(sizeof(Log));
-	pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-
-	fileInfo->file = file;
-	fileInfo->fileMutex = mutex;
-
-	return fileInfo;
-
-}
-
 Branch* createBranch(Task** tasks, int nbTasks, int maxTime, char* name, Log* log){
 
 	Branch* newBranch = (Branch*) malloc(sizeof(Branch));
@@ -258,21 +129,4 @@ pthread_t* serialize(Branch** branchs, int nbBranch){
 	}
 
 	return threads;
-}
-
-void waitMutex(TaskInfo* taskInfo){
-
-	State needWait;
-
-	pthread_mutex_lock(&taskInfo->mutex);
-	if(taskInfo->state == STATE_IN_PROGRESS){
-		taskInfo->state = STATE_ENDED;
-	}
-	pthread_mutex_unlock(&taskInfo->mutex);
-
-	do{
-		pthread_mutex_lock(&taskInfo->mutex);
-		needWait = taskInfo->state;
-		pthread_mutex_unlock(&taskInfo->mutex);
-	}while(needWait != STATE_IN_PROGRESS);
 }

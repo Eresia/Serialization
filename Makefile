@@ -5,7 +5,7 @@ objectDir=bin
 srcDir=src
 headDir=include
 
-CFLAGS=-Wall -g -DDEBUG -I$(scriptDir)/$(headDir)
+CFLAGS=-Wall -g -DDEBUG -I$(scriptDir)/$(headDir) `xml2-config --cflags`
 EFLAGS=-lpthread
 
 srcExt=.c

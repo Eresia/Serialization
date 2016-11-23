@@ -1,0 +1,15 @@
+<config>
+	<branch name="Line 1">
+		<Task name="T1">
+	</branch>
+
+	<branch name="Line 2">
+		<Task name="T2" />
+		<Task name="T3" />
+		<Task name="T4" />
+	</branch>
+
+	<branch name="Line 3">
+		<Task name="T5" />
+	</branch>
+</config>

@@ -2,7 +2,11 @@
 #include <pthread.h>
 #include <string.h>
 #include <fcntl.h>
-#include "serialization/serialization.h"
+#include <libxml/parser.h>
+
+#include "serialization/branch.h"
+#include "serialization/task.h"
+#include "serialization/log.h"
 
 void T1();
 void T2();

@@ -1,0 +1,33 @@
+#ifndef TASK_H
+#define TASK_H
+
+#include <stdlib.h>
+#include <pthread.h>
+
+#include "useful/bool.h"
+
+typedef enum State State;
+enum State{STATE_WAIT, STATE_IN_PROGRESS, STATE_ENDED, STATE_OUT_DEADLINE};
+
+typedef struct TaskInfo TaskInfo;
+struct TaskInfo{
+	pthread_mutex_t mutex;
+	State state;
+	void (*function)(void);
+};
+
+typedef struct Task Task;
+struct Task{
+	pthread_t thread;
+	TaskInfo taskInfo;
+	char* name;
+};
+
+/*======Private======*/
+void* launchTask(void* crit_void);
+void waitMutex(TaskInfo* taskInfo);
+
+/*======Public======*/
+Task* createTask(void (*function)(void), char* name);
+
+#endif
