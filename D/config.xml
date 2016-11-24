@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE config SYSTEM "config.dtd">
+<config>
+	<info>
+		<logFile name="test.txt" />
+	</info>
+
+	<builder>
+		<branch name="Line 1" time="300">
+			<task name="T1">
+				<function file="plugins/functions.so" name="T1"/>
+			</task>
+		</branch>
+
+		<branch name="Line 2" time="300">
+			<task name="T2" >
+				<function file="plugins/functions.so" name="T2"/>
+			</task>
+			<task name="T3" >
+				<function file="plugins/functions.so" name="T3"/>
+			</task>
+			<task name="T4" >
+				<function file="plugins/functions.so" name="T4"/>
+			</task>
+		</branch>
+
+		<branch name="Line 3" time="300">
+			<task name="T5" >
+				<function file="plugins/functions.so" name="T5"/>
+			</task>
+		</branch>
+	</builder>
+</config>

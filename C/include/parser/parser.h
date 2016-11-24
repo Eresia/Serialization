@@ -4,6 +4,7 @@
 #include <libxml/parser.h>
 
 #include "serialization/log.h"
+#include "serialization/task.h"
 #include "serialization/branch.h"
 
 typedef struct ParsedData ParsedData;
