@@ -1,6 +1,8 @@
 #ifndef FUNCTIONS_H
 #define FUNCTIONS_H
 
+#include <unistd.h>
+
 void T1();
 void T2();
 void T3();
