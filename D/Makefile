@@ -5,7 +5,7 @@ objectDir=bin
 srcDir=src
 headDir=include
 
-CFLAGS=-od $(objectDir) -g -I=$(scriptDir)/src
+CFLAGS=-od $(objectDir) -g -I=$(scriptDir)/src -d-debug
 EFLAGS=-g
 
 srcExt=.d

@@ -14,6 +14,10 @@ class TaskInfo{
 			this.state = State.STATE_WAIT;
 		}
 
+		void launchFunction(){
+			func();
+		}
+
 		State getState(){
 			return state;
 		}

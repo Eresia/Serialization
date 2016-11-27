@@ -1,8 +1,14 @@
 module serialization.branch;
 
+debug{
+	import std.stdio;
+	import std.conv;
+}
+
 import std.datetime;
 import core.thread;
 
+import serialization.task.state;
 import serialization.task.task;
 import serialization.log.log;
 import serialization.log.log_gestion;
@@ -18,62 +24,75 @@ class Branch : Thread{
 
 		void run(){
 
-			LogGestion logGestion = LogGestion(log);
+			LogGestion logGestion = new LogGestion(log);
+
+			debug{
+				writeln("Branch \"" ~ this.name ~ "\" : Creating Log Thread");
+			}
 
 			logGestion.start();
 
 			while(true){
 				long beginTime, endTime;
-				int completeTime;
 				State taskInfo;
 				int lastTask;
 				string message;
 
-		    	beginTime = Clock.currTime().stdTime;
+				debug{
+					writeln("Branch \"" ~ this.name ~ "\" : Begin new loop");
+				}
+
+				debug{
+					writeln("Branch \"" ~ this.name ~ "\" : Get Begin Time");
+				}
+
+		    	beginTime = (Clock.currTime().stdTime / 10000);
 
 				for(int i = 0; i < tasks.length; i++){
 					Task task = tasks[i];
 
-					task.setState(STATE_IN_PROGRESS);
+					debug{
+						writeln("Branch \"" ~ this.name ~ "\" : Begin Task \"" ~ task.getName() ~ "\"");
+					}
+
+					task.setState(State.STATE_IN_PROGRESS);
 
 					do{
 						taskInfo = task.getState();
-						endTime = Clock.currTime().stdTime;
+						endTime = (Clock.currTime().stdTime / 10000);
 
 						if(outDeadline(beginTime, endTime, maxTime)){
-							taskInfo = STATE_OUT_DEADLINE;
+							taskInfo = State.STATE_OUT_DEADLINE;
 						}
 
-						usleep(20000);
-					}while((taskInfo != STATE_ENDED) && (taskInfo != STATE_OUT_DEADLINE));
+						Thread.sleep(dur!("msecs")(20));
+					}while((taskInfo != State.STATE_ENDED) && (taskInfo != State.STATE_OUT_DEADLINE));
 
-					pthread_mutex_lock(&task->taskInfo.mutex);
-					task->taskInfo.state = STATE_WAIT;
+					task.setState(State.STATE_WAIT);
 
 					lastTask = i;
 
-					if(taskInfo == STATE_OUT_DEADLINE){
-						#ifdef DEBUG
-							printf("Branch \"%s\" : DeadLine out at task \"%s\"\n", (*branch)->name, (*branch)->tasks[lastTask]->name);
-						#endif
+					if(taskInfo == State.STATE_OUT_DEADLINE){
+						debug{
+							writeln("Branch \"" ~ this.name ~ "\" : DeadLine out at task  \"" ~ task.getName() ~ "\" at " ~ to!string(endTime - beginTime) ~ " ms");
+						}
 						break;
 					}
 
 				}
 
-				#ifdef DEBUG
-					printf("Branch \"%s\" : End of loop\n", (*branch)->name);
-				#endif
+				debug{
+					writeln("Branch \"" ~ this.name ~ "\" : End of loop at " ~ to!string(endTime - beginTime) ~ " ms");
+				}
 
-				completeTime = ((endTime.tv_sec * 1000000) + (endTime.tv_usec)) - ((beginTime.tv_sec * 1000000) + (beginTime.tv_usec));
-				message = createLogMessage((*branch)->name, (*branch)->tasks, lastTask, (taskInfo == STATE_OUT_DEADLINE), completeTime);
-				sendToLog(log, message);
+				message = LogGestion.generateMessage(name, tasks, lastTask, (taskInfo == State.STATE_OUT_DEADLINE), endTime - beginTime);
+				logGestion.sendToLog(message);
 			}
 
 		}
 
 		bool outDeadline(long beginTime, long nowTime, int maxTime){
-			return ((nowTime - beginTime) > (maxTime*10000));
+			return ((nowTime - beginTime) > maxTime);
 		}
 
 	public:
@@ -85,7 +104,11 @@ class Branch : Thread{
 			this.log = log;
 		}
 
-		void serialize(Branch[] branchs){
+		static void serialize(Branch[] branchs){
+
+			debug{
+				writeln("Launching " ~ to!string(branchs.length) ~ " branchs\n");
+			}
 
 			for(int i = 0; i < branchs.length; i++){
 				branchs[i].start();

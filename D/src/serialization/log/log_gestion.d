@@ -1,5 +1,9 @@
 module serialization.log.log_message;
 
+debug{
+	import std.stdio;
+}
+
 import std.conv;
 import std.algorithm;
 import core.stdc.string;
@@ -25,6 +29,9 @@ class LogGestion : Thread{
 				}
 
 				if(newMessage.length > 0){
+					debug{
+						writeln("Test Writing on file : \"" ~ newMessage ~ "\"");
+					}
 					this.log.writeOnFile(newMessage);
 					newMessage = "";
 				}
@@ -45,7 +52,13 @@ class LogGestion : Thread{
 			this.message = "";
 		}
 
-		static string generateMessage(string branchName, Task[] tasks, int lastTask, bool aborted, int time){
+		void sendToLog(string message){
+			synchronized{
+				setMessage(this.message ~ message);
+			}
+		}
+
+		static string generateMessage(string branchName, Task[] tasks, int lastTask, bool aborted, long time){
 			string result;
 
 			result = branchName;
@@ -63,15 +76,9 @@ class LogGestion : Thread{
 				result ~= "End ";
 			}
 
-			result ~= to!string(time/1000);
+			result ~= to!string(time);
 
 			return result;
-		}
-
-		void sendToLog(string message){
-			synchronized{
-				setMessage(this.message ~ message);
-			}
 		}
 
 

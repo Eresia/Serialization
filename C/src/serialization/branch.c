@@ -29,10 +29,10 @@ void* launchBranch(void* branch_void){
 
 	while(true){
 		struct timeval beginTime, endTime;
-		int completeTime;
 		State taskInfo;
 		int lastTask;
 		char* message;
+		long completeTime;
 
 		#ifdef DEBUG
 			printf("Branch \"%s\" : Begin new loop\n", (*branch)->name);
@@ -74,18 +74,19 @@ void* launchBranch(void* branch_void){
 
 			if(taskInfo == STATE_OUT_DEADLINE){
 				#ifdef DEBUG
-					printf("Branch \"%s\" : DeadLine out at task \"%s\"\n", (*branch)->name, (*branch)->tasks[lastTask]->name);
+					printf("Branch \"%s\" : DeadLine out at task \"%s\" at %li ms\n", (*branch)->name, (*branch)->tasks[lastTask]->name, getCompleteTime(beginTime, endTime));
 				#endif
 				break;
 			}
 
 		}
 
+		completeTime = getCompleteTime(beginTime, endTime);
+
 		#ifdef DEBUG
-			printf("Branch \"%s\" : End of loop\n", (*branch)->name);
+			printf("Branch \"%s\" : End of loop at %li ms\n", (*branch)->name, completeTime);
 		#endif
 
-		completeTime = ((endTime.tv_sec * 1000000) + (endTime.tv_usec)) - ((beginTime.tv_sec * 1000000) + (beginTime.tv_usec));
 		message = createLogMessage((*branch)->name, (*branch)->tasks, lastTask, (taskInfo == STATE_OUT_DEADLINE), completeTime);
 		sendToLog(log, message);
 	}
@@ -93,13 +94,12 @@ void* launchBranch(void* branch_void){
 	pthread_exit(NULL);
 }
 
+long getCompleteTime(struct timeval beginTime, struct timeval endTime){
+	return ((endTime.tv_sec * 1000000) + (endTime.tv_usec)) - ((beginTime.tv_sec * 1000000) + (beginTime.tv_usec));
+}
+
 bool outDeadline(struct timeval beginTime, struct timeval nowTime, int maxTime){
-	gettimeofday(&nowTime, NULL);
-
-	long int completeBeginTime = beginTime.tv_sec * 1000000 + beginTime.tv_usec;
-	long int completeNowTime = nowTime.tv_sec * 1000000 + nowTime.tv_usec;
-
-	return ((completeNowTime - completeBeginTime) > maxTime * 1000);
+	return (getCompleteTime(beginTime, nowTime) > maxTime * 1000);
 }
 
 /*======Public======*/

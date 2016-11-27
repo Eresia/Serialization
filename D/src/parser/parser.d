@@ -1,26 +1,25 @@
 module parser.parser;
 
-import serialization.task.task;
 import serialization.branch;
-import serialization.log.log;
 
 abstract class Parser {
 
-	protected:
+	private:
 		string fileName;
 
-		Branch[] result;
+	protected:
+
+		string getFileName(){
+			return fileName;
+		}
 
 	public:
 		this(string fileName){
 			this.fileName = fileName;
-			result = null;
 		}
 
 		abstract void parse();
 
-		Branch[] getResult(){
-			return result;
-		}
+		abstract Branch[] getResult();
 
 }

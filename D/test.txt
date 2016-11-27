@@ -1,0 +1,21 @@
+NB_LINES = 3
+Line 3 : T5 -> End 221
+Line 1 : T1 -> End 221
+Line 2 : T2 -> T3 -> Aborted 301
+Line 3 : T5 -> End 221
+Line 1 : T1 -> End 221
+Line 2 : T2 -> T3 -> Aborted 302
+Line 3 : T5 -> End 221
+Line 1 : T1 -> End 221
+Line 1 : T1 -> End 222
+Line 3 : T5 -> End 222
+Line 2 : T2 -> T3 -> Aborted 302
+Line 3 : T5 -> End 221
+Line 1 : T1 -> End 221
+Line 2 : T2 -> T3 -> Aborted 301
+Line 1 : T1 -> End 221
+Line 3 : T5 -> End 221
+Line 2 : T2 -> T3 -> Aborted 302
+Line 3 : T5 -> End 220
+Line 1 : T1 -> End 221
+Line 1 : T1 -> End 221

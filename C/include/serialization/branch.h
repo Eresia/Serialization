@@ -21,6 +21,7 @@ struct Branch{
 
 /*======Private======*/
 void* launchBranch(void* branch_void);
+long getCompleteTime(struct timeval beginTime, struct timeval endTime);
 bool outDeadline(struct timeval beginTime, struct timeval nowTime, int maxTime);
 
 /*======Public======*/
