@@ -30,3 +30,4 @@
 
 # Under Makefile
 src/**/Makefile
+test.txt

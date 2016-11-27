@@ -12,7 +12,7 @@
 			</task>
 		</branch>
 
-		<branch name="Line 2" time="300">
+		<branch name="Line 2" time="600">
 			<task name="T2" >
 				<function file="plugins/functions.so" name="T2"/>
 			</task>

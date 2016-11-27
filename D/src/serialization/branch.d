@@ -79,6 +79,10 @@ class Branch : Thread{
 						break;
 					}
 
+					debug{
+						writeln("Branch \"" ~ this.name ~ "\" : End of task \"" ~ task.getName() ~ "\" at " ~ to!string(endTime - beginTime) ~ " ms");
+					}
+
 				}
 
 				debug{
