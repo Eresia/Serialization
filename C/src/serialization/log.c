@@ -1,26 +1,29 @@
 #include "serialization/log.h"
 
 /*======Private======*/
-void* logGestion(void* logMessage_void){
-	LogMessage* logMessage = (LogMessage*) logMessage_void;
+
+/*Thread of log gestion*/
+void* logGestion(void* logGestion_void){
+	LogGestion* logGestion = (LogGestion*) logGestion_void;
 	char* message = NULL;
 
 	while(true){
-		pthread_mutex_lock(&logMessage->messageMutex);
-		if(*logMessage->message != NULL){
-			message = *logMessage->message;
-			*logMessage->message = NULL;
+		/*Take message in the buffer*/
+		pthread_mutex_lock(&logGestion->messageMutex);
+		if(*logGestion->message != NULL){
+			message = *logGestion->message;
+			*logGestion->message = NULL;
 		}
-		pthread_mutex_unlock(&logMessage->messageMutex);
+		pthread_mutex_unlock(&logGestion->messageMutex);
 
 		if(message != NULL){
-			pthread_mutex_lock(&logMessage->log->fileMutex);
+			pthread_mutex_lock(&logGestion->log->fileMutex);
 			#ifdef DEBUG
 				printf("Test Writing on file : \"%s\"\n", message);
 			#endif
-			write(logMessage->log->file, message, strlen(message));
+			write(logGestion->log->file, message, strlen(message));
 			//fputs(message, logMessage->log->file);
-			pthread_mutex_unlock(&logMessage->log->fileMutex);
+			pthread_mutex_unlock(&logGestion->log->fileMutex);
 
 			if(message != NULL){
 				free(message);
@@ -35,6 +38,7 @@ void* logGestion(void* logMessage_void){
 	pthread_exit(NULL);
 }
 
+/*Create message which will be sending to log*/
 char* createLogMessage(char* branchName, Task** tasks, int lastTask, bool aborted, int time){
 
 	char* result;
@@ -75,7 +79,8 @@ char* createLogMessage(char* branchName, Task** tasks, int lastTask, bool aborte
 	return result;
 }
 
-void sendToLog(LogMessage log, char* message){
+/*Send message to log thread*/
+void sendToLog(LogGestion log, char* message){
 	pthread_mutex_lock(&log.messageMutex);
 	if(*log.message == NULL){
 		*log.message = malloc((strlen(message)+1)*sizeof(char));
@@ -91,6 +96,8 @@ void sendToLog(LogMessage log, char* message){
 }
 
 /*======Public======*/
+
+/*Create log struct*/
 Log* createLog(char* fileName, char* firstLine){
 
 	int file = open(fileName, O_WRONLY | O_TRUNC);

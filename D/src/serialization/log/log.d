@@ -6,7 +6,6 @@ import core.sync.mutex;
 class Log{
 
 	private:
-		//File file;
 		string fileName;
 
 	public:
@@ -20,7 +19,7 @@ class Log{
 
 		void writeOnFile(string message){
 			synchronized{
-				append(fileName, message ~ "\n");	
+				append(fileName, message ~ "\n");
 			}
 		}
 }

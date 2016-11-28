@@ -13,12 +13,14 @@ import core.thread;
 import serialization.task.task;
 import serialization.log.log;
 
+/*Log Gestion Object*/
 class LogGestion : Thread{
 
 	private:
 		Log log;
 		shared string message;
 
+		/*Thread of log gestion*/
 		void run(){
 			string newMessage = "";
 

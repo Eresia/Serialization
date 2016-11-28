@@ -8,6 +8,7 @@ xmlNode* getNodeNext(xmlNode* parent){
 	return parent->next->next;
 }
 
+/*Parse a XML tree to ParsedData struct*/
 ParsedData* parseTreeXML(xmlDocPtr doc){
 
 	ParsedData* result = NULL;
@@ -24,16 +25,20 @@ ParsedData* parseTreeXML(xmlDocPtr doc){
 	xmlNode* builderElement = getNodeNext(infoElement);
 
 	int nbBranch = xmlChildElementCount(builderElement);
+
 	char* logFileName = (char*) xmlGetProp(getNodeChildren(infoElement), (xmlChar*) "name");
 
 	message = (char*) malloc((strlen("NB_LINES = ")+(nbBranch%10)+3) * sizeof(char));
 	sprintf(message, "NB_LINES = %d\n", nbBranch);
+
+	/*Creating Log struct*/
 	log = createLog(logFileName, message);
 
 	branchs = (Branch**) malloc(nbBranch*sizeof(Branch*));
 
 	i = 0;
 
+	/*Parsing and build result*/
 	for(xmlNode* actBranch = getNodeChildren(builderElement); actBranch != NULL; actBranch = actBranch->next){
 		if(actBranch->type == XML_ELEMENT_NODE){
 			char* branchName = (char*) xmlGetProp(actBranch, (xmlChar*) "name");
@@ -74,6 +79,8 @@ ParsedData* parseTreeXML(xmlDocPtr doc){
 }
 
 /*======Public======*/
+
+/*Parse a XML file to ParsedData struct*/
 ParsedData* parseXML(char* fileName){
 
 	ParsedData* result = NULL;

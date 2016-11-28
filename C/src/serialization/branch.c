@@ -4,7 +4,7 @@
 void* launchBranch(void* branch_void){
 
 	Branch** branch = (Branch**) branch_void;
-	LogMessage log;
+	LogGestion log;
 	pthread_mutex_t messageMutex = PTHREAD_MUTEX_INITIALIZER;
 	pthread_t logThread;
 

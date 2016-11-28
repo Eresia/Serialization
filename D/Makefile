@@ -14,7 +14,7 @@ headerExt=
 launcher=serialization.out
 
 directories=$(shell find $(srcDir) -type d | sed '1d')
-headDirectories=$(shell find $(headDir) -type d | sed '1d')
+#headDirectories=$(shell find $(headDir) -type d | sed '1d')
 
 srcFile=$(foreach dir, $(directories), $(wildcard $(dir)/*$(srcExt)))
 
