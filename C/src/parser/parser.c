@@ -58,6 +58,8 @@ ParsedData* parseTreeXML(xmlDocPtr doc){
 					char* taskName = (char*) xmlGetProp(actTask, (xmlChar*) "name");
 					char* taskFunctionFile = (char*) xmlGetProp(getNodeChildren(actTask), (xmlChar*) "file");
 					char* taskFunctionName = (char*) xmlGetProp(getNodeChildren(actTask), (xmlChar*) "name");
+
+					/*Create task and launch the thread with given function*/
 					tasks[j] = createTask(taskName, taskFunctionFile, taskFunctionName);
 					if(tasks[j] == NULL){
 						return NULL;

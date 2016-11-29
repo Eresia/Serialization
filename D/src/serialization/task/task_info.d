@@ -14,6 +14,7 @@ class TaskInfo{
 			this.state = State.STATE_WAIT;
 		}
 
+		/*Ask the loaded function*/
 		void launchFunction(){
 			func();
 		}

@@ -17,6 +17,7 @@ class Log{
 			}
 		}
 
+		/*Write on log file the given message*/
 		void writeOnFile(string message){
 			synchronized{
 				append(fileName, message ~ "\n");

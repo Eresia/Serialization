@@ -54,12 +54,14 @@ class LogGestion : Thread{
 			this.message = "";
 		}
 
+		/*Send message to log thread*/
 		void sendToLog(string message){
 			synchronized{
 				setMessage(this.message ~ message);
 			}
 		}
 
+		/*Generate message sending to log*/
 		static string generateMessage(string branchName, Task[] tasks, int lastTask, bool aborted, long time){
 			string result;
 

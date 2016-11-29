@@ -22,6 +22,7 @@ class Task : Thread{
 			}
 		}
 
+		/*Load a function with dlfcn library*/
 		void function() loadFunction(string functionFile, string functionName){
 			void function() func;
 
@@ -42,10 +43,10 @@ class Task : Thread{
 				return null;
 			}
 
-			// Exécution de la fonction "func"
 			return func;
 		}
 
+		/*Function to the condition variable gestion*/
 		void waitMutex(TaskInfo taskInfo){
 			State needWait;
 

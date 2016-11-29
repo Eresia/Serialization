@@ -1,6 +1,8 @@
 #include "serialization/task.h"
 
 /*======Private======*/
+
+/*Load a function with dlfcn library*/
 void* loadFunction(char* functionFile, char* functionName){
 	void (*func)();
 
@@ -21,10 +23,10 @@ void* loadFunction(char* functionFile, char* functionName){
 		return NULL;
 	}
 
-	// Exécution de la fonction "func"
 	return func;
 }
 
+/*Thread of the task*/
 void* launchTask(void* taskInfo_void){
 
 	TaskInfo* taskInfo = (TaskInfo*) taskInfo_void;
@@ -37,6 +39,7 @@ void* launchTask(void* taskInfo_void){
 	pthread_exit(NULL);
 }
 
+/*Function to the condition variable gestion*/
 void waitMutex(TaskInfo* taskInfo){
 
 	State needWait;
@@ -55,6 +58,8 @@ void waitMutex(TaskInfo* taskInfo){
 }
 
 /*======Public======*/
+
+/*Create task struct*/
 Task* createTask(char* name, char* functionFile, char* functionName){
 
 	Task* newTask = (Task*) malloc(sizeof(Task));

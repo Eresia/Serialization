@@ -22,6 +22,7 @@ class Branch : Thread{
 
 		Log log;
 
+		/*Thread of the branch gestion*/
 		void run(){
 
 			LogGestion logGestion = new LogGestion(log);
@@ -30,6 +31,7 @@ class Branch : Thread{
 				writeln("Branch \"" ~ this.name ~ "\" : Creating Log Thread");
 			}
 
+			/*Begin log thread*/
 			logGestion.start();
 
 			while(true){
@@ -46,8 +48,10 @@ class Branch : Thread{
 					writeln("Branch \"" ~ this.name ~ "\" : Get Begin Time");
 				}
 
+				/*Begin timer*/
 		    	beginTime = (Clock.currTime().stdTime / 10000);
 
+				/*For each task*/
 				for(int i = 0; i < tasks.length; i++){
 					Task task = tasks[i];
 
@@ -55,12 +59,15 @@ class Branch : Thread{
 						writeln("Branch \"" ~ this.name ~ "\" : Begin Task \"" ~ task.getName() ~ "\"");
 					}
 
+					/*Launch the task*/
 					task.setState(State.STATE_IN_PROGRESS);
 
+					/*While task did not end or timeout*/
 					do{
 						taskInfo = task.getState();
 						endTime = (Clock.currTime().stdTime / 10000);
 
+						/*Check timer*/
 						if(outDeadline(beginTime, endTime, maxTime)){
 							taskInfo = State.STATE_OUT_DEADLINE;
 						}
@@ -72,6 +79,7 @@ class Branch : Thread{
 
 					lastTask = i;
 
+					/*If timeout, break the loop*/
 					if(taskInfo == State.STATE_OUT_DEADLINE){
 						debug{
 							writeln("Branch \"" ~ this.name ~ "\" : DeadLine out at task  \"" ~ task.getName() ~ "\" at " ~ to!string(endTime - beginTime) ~ " ms");
@@ -89,12 +97,14 @@ class Branch : Thread{
 					writeln("Branch \"" ~ this.name ~ "\" : End of loop at " ~ to!string(endTime - beginTime) ~ " ms");
 				}
 
+				/*Create log message and send this message to log thread*/
 				message = LogGestion.generateMessage(name, tasks, lastTask, (taskInfo == State.STATE_OUT_DEADLINE), endTime - beginTime);
 				logGestion.sendToLog(message);
 			}
 
 		}
 
+		/*Return if a DeadLine is out*/
 		bool outDeadline(long beginTime, long nowTime, int maxTime){
 			return ((nowTime - beginTime) > maxTime);
 		}
@@ -108,6 +118,7 @@ class Branch : Thread{
 			this.log = log;
 		}
 
+		/*Begin serialize processus*/
 		static void serialize(Branch[] branchs){
 
 			debug{

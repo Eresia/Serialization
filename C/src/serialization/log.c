@@ -22,7 +22,7 @@ void* logGestion(void* logGestion_void){
 				printf("Test Writing on file : \"%s\"\n", message);
 			#endif
 			write(logGestion->log->file, message, strlen(message));
-			//fputs(message, logMessage->log->file);
+			
 			pthread_mutex_unlock(&logGestion->log->fileMutex);
 
 			if(message != NULL){
