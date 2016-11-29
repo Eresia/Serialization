@@ -22,7 +22,7 @@ headers=$(foreach dir, $(headDirectories), $(wildcard $(scriptDir)/$(dir)/*$(hea
 
 objects=$(foreach file, $(srcFile:$(srcExt)=.o), $(objectDir)/$(notdir $(file)))
 
-all: $(launcher)
+all: $(launcher) plug
 
 #all:
 #	@echo $(scriptDir)/$(objectDir)
